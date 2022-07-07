@@ -21,6 +21,15 @@
         </v-row>
       </v-container>
     </v-main>
+
+    <v-snackbar v-model="showNotif" timeout="1500">
+      {{ notifMsg }}
+      <template v-slot:action="{ attrs }">
+        <v-btn :color="notifColor" text v-bind="attrs" @click="showNotif = false">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
   </v-app>
 </template>
 
@@ -47,19 +56,31 @@ export default {
   data () {
     return {
       valid: false,
-      user: { name: '', age: '' }
+      user: { name: '', age: '' },
+      showNotif: false,
+      notifMsg: '',
+      notifColor: ''
     }
   },
   methods: {
     addUser () {
       this.$refs.form.validate();
       if (this.valid) {
-        store.dispatch("addToList2", this.user);
-        store.dispatch("searchRemove", this.user);
-        this.user = { name: '', age: '' };
-        this.$refs.name.focus();
-        this.$refs.form.resetValidation();
+        store.dispatch("addToList2", this.user).then(() => {
+          store.dispatch("searchRemove", this.user);
+          this.user = { name: '', age: '' };
+          this.$refs.name.focus();
+          this.$refs.form.resetValidation();
+          this.showNotification('User added');
+        }).catch(err => {
+          this.showNotification(err, 'red');
+        })
       }
+    },
+    showNotification (msg, color) {
+      this.showNotif = true;
+      this.notifMsg = msg;
+      this.notifColor = color;
     }
   }
 };

@@ -37,7 +37,16 @@ const mutations = {
 
 const actions = {
   addToList2(context, user) {
-    context.commit("add_to_list2", user);
+    return new Promise((resolve, reject) => {
+      let isInList = false;
+      context.state.list2.map(a => {
+        if (a.name == user.name && a.age == user.age) { reject('User already in list'); isInList = true; }
+      });
+      if (!isInList) {
+        context.commit("add_to_list2", user);
+        resolve();
+      }
+    })
   },
   searchRemove(context, user) {
     context.commit("searchRemove", user);
